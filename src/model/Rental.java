@@ -21,7 +21,7 @@ public class Rental {
     private LocalDate dateActuallyReturned;
     private BigDecimal finalPrice;
     private RentalStatuses rentalStatuses;
-    private final static BigDecimal LATE_RETURN_FEE = BigDecimal.valueOf(50);
+
 
     /**
      * Creates a new rental.
@@ -224,47 +224,6 @@ public class Rental {
     }
 
     /**
-     * Calculates the final rental price.
-     *
-     * The base price is calculated using the number of days
-     * between the rental start date and the expected return date.
-     *
-     * If the car is returned late, a fixed late fee is added
-     * for each late day.
-     */
-    public void calculateFinalPrice() {
-
-        // Calculate the number of planned rental days.
-        int rentalDays = (int) ChronoUnit.DAYS.between(
-                getDateTheRentalBegins(),
-                getDateExpectedBack());
-
-        if (rentalDays < 1) {
-            rentalDays = 1;
-        }
-        // Calculate the base rental price according to the car type.
-        BigDecimal total = this.car.calculatePrice(rentalDays);
-
-        // Check whether the car was returned after the expected date.
-        if (getDateActuallyReturned() != null && getDateActuallyReturned().isAfter(getDateExpectedBack())) {
-            // Calculate only the number of late days.
-            int lateDays = (int) ChronoUnit.DAYS.between(
-                    getDateExpectedBack(),
-                    getDateActuallyReturned()
-            );
-
-            // Calculate the total late return fee.
-            BigDecimal lateFee = BigDecimal.valueOf(lateDays).multiply(LATE_RETURN_FEE);
-
-            total = total.add(lateFee);
-
-        }
-
-        this.finalPrice = total;
-
-    }
-
-    /**
      * Returns the final rental price.
      *
      * @return final price, or null if the price has not been calculated yet
@@ -274,4 +233,12 @@ public class Rental {
     }
 
 
+    /**
+     * Sets the final price of the rental.
+     *
+     * @param finalPrice the final calculated rental price
+     */
+    public void setFinalPrice(BigDecimal finalPrice) {
+        this.finalPrice = finalPrice;
+    }
 }
