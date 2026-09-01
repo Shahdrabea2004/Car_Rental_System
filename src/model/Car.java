@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 public abstract class Car {
 
     // Immutable car information
-    private final int id;
+    private final String id;
     private final String brand;
     private final String model;
     private final String manufacturingYear;
@@ -27,7 +27,7 @@ public abstract class Car {
      * Constructs a Car with the given basic information.
      * A newly created car is initially AVAILABLE.
      */
-    public Car(int id, String brand, String model, String manufacturingYear, BigDecimal baseDailyRentalPrice) {
+    public Car(String id, String brand, String model, String manufacturingYear, BigDecimal baseDailyRentalPrice) {
         this.id = id;
         this.brand = brand;
         this.model = model;
@@ -61,7 +61,7 @@ public abstract class Car {
 
 
     // Getters for immutable car information
-    public int getId() {
+    public String getId() {
         return id;
     }
 

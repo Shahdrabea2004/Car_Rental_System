@@ -28,7 +28,7 @@ public class EconomyCar extends Car {
      * @param baseDailyRentalPrice base daily rental price
      * @param fuelEfficiency fuel efficiency in kilometers per liter
      */
-    public EconomyCar(int id, String brand, String model, String manufacturingYear, String description, BigDecimal baseDailyRentalPrice, int fuelEfficiency) {
+    public EconomyCar(String id, String brand, String model, String manufacturingYear, String description, BigDecimal baseDailyRentalPrice, int fuelEfficiency) {
         super(id, brand, model, manufacturingYear, baseDailyRentalPrice);
         validateFuelEfficiency(fuelEfficiency);
         this.fuelEfficiency = fuelEfficiency;

@@ -30,7 +30,7 @@ public class Truck extends Car {
      * @param cargoCapacity        cargo capacity of the truck
      * @param specialLicense       whether a special license is required
      */
-    public Truck(int id, String brand, String model, String manufacturingYear, BigDecimal baseDailyRentalPrice, double cargoCapacity, boolean specialLicense) {
+    public Truck(String id, String brand, String model, String manufacturingYear, BigDecimal baseDailyRentalPrice, double cargoCapacity, boolean specialLicense) {
         super(id, brand, model, manufacturingYear, baseDailyRentalPrice);
 
         this.specialLicense = specialLicense;

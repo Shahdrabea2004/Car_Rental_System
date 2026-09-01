@@ -33,7 +33,7 @@ public class LuxuryCar extends Car {
      * @param baseDailyRentalPrice base daily rental price
      * @param premiumFeatures      list of premium features
      */
-    public LuxuryCar(int id, String brand, String model, String manufacturingYear, BigDecimal baseDailyRentalPrice, List<String> premiumFeatures) {
+    public LuxuryCar(String id, String brand, String model, String manufacturingYear, BigDecimal baseDailyRentalPrice, List<String> premiumFeatures) {
         super(id, brand, model, manufacturingYear, baseDailyRentalPrice);
 
         validatePremiumFeatures(premiumFeatures);

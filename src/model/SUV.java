@@ -31,7 +31,7 @@ public class SUV extends Car {
      * @param baseDailyRentalPrice base daily rental price
      * @param numberOfSeats        number of seats in the SUV
      */
-    public SUV(int id, String brand, String model, String manufacturingYear, BigDecimal baseDailyRentalPrice, int numberOfSeats) {
+    public SUV(String id, String brand, String model, String manufacturingYear, BigDecimal baseDailyRentalPrice, int numberOfSeats) {
         super(id, brand, model, manufacturingYear, baseDailyRentalPrice);
         validateNumberOfSeated(numberOfSeats);
         this.numberOfSeats = numberOfSeats;
