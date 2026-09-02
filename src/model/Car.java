@@ -24,8 +24,15 @@ public abstract class Car {
 
 
     /**
-     * Constructs a Car with the given basic information.
-     * A newly created car is initially AVAILABLE.
+     * Constructs a new Car with the specified information.
+     *
+     * @param id                    unique car identifier
+     * @param brand                 car brand
+     * @param model                 car model
+     * @param manufacturingYear     car manufacturing year
+     * @param baseDailyRentalPrice  base daily rental price
+     *
+     * A newly created car starts with AVAILABLE status.
      */
     public Car(String id, String brand, String model, String manufacturingYear, BigDecimal baseDailyRentalPrice) {
         this.id = id;
@@ -88,14 +95,15 @@ public abstract class Car {
 
 
     /**
-     * Validates that the car is in the expected status
+     * Validates that the car is currently in the expected status
      * before performing a status transition.
      *
      * @param expectedStatus required current status
-     * @param errorMessage   error message for an invalid transition
-     * @throws CarStatusException if the current status is invalid
+     * @param errorMessage error message when the current status is invalid
+     * @throws CarStatusException if the current status does not match
+     *                            the expected status
      */
-    private void validateStatus(CarStatus expectedStatus, String errorMessage) throws CarStatusException {
+    private void validateStatus(CarStatus expectedStatus, String errorMessage)  {
         if (this.carStatus != expectedStatus) {
             throw new CarStatusException(errorMessage);
         }
@@ -106,7 +114,7 @@ public abstract class Car {
      *
      * @throws CarStatusException if the car is not available
      */
-    public void rent() throws CarStatusException {
+    public void rent() {
         validateStatus(CarStatus.AVAILABLE, "Car must be available to be rented.");
         this.carStatus = CarStatus.RENTED;
 
@@ -117,7 +125,7 @@ public abstract class Car {
      *
      * @throws CarStatusException if the car is not rented
      */
-    public void returnCar() throws CarStatusException {
+    public void returnCar()  {
         validateStatus(CarStatus.RENTED, "Only a rented car can be returned.");
         this.carStatus = CarStatus.AVAILABLE;
 
@@ -128,7 +136,7 @@ public abstract class Car {
      *
      * @throws CarStatusException if the car is not available
      */
-    public void sendToMaintenance() throws CarStatusException {
+    public void sendToMaintenance() {
         validateStatus(CarStatus.AVAILABLE, "Only an available car can be placed into maintenance.");
         this.carStatus = CarStatus.UNDER_MAINTENANCE;
     }
@@ -138,7 +146,7 @@ public abstract class Car {
      *
      * @throws CarStatusException if the car is not under maintenance
      */
-    public void returnFromMaintenance() throws CarStatusException {
+    public void returnFromMaintenance()  {
         validateStatus(CarStatus.UNDER_MAINTENANCE, "Car is not under maintenance.");
         this.carStatus = CarStatus.AVAILABLE;
     }

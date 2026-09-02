@@ -4,11 +4,11 @@ import exception.RentalValidationException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+
 
 /**
  * Represents a rental transaction between a customer and a car.
- *
+ * <p>
  * A Rental stores information about the customer, rented car,
  * rental dates, return date, final price, and rental status.
  */
@@ -195,12 +195,12 @@ public class Rental {
 
     /**
      * Sets the actual return date.
-     * <p>
-     * The actual return date cannot be null and must be
-     * after the rental start date and expected date.
+     *
+     * The actual return date cannot be null and cannot be
+     * before the rental start date.
      *
      * @param dateActuallyReturned actual date the car was returned
-     * @throws RentalValidationException if the date is invalid
+     * @throws RentalValidationException if the date is null or before the rental start date
      */
     public void setDateActuallyReturned(LocalDate dateActuallyReturned) {
         if (dateActuallyReturned == null) {
@@ -209,17 +209,12 @@ public class Rental {
             );
         }
 
-        if (!dateActuallyReturned.isAfter(dateTheRentalBegins)) {
+        if (dateActuallyReturned.isBefore(dateTheRentalBegins)) {
             throw new RentalValidationException(
-                    "Actual return date must be after rental start date."
+                    "Actual return date cannot be before rental start date."
             );
         }
 
-        if (!dateActuallyReturned.isAfter(dateExpectedBack)) {
-            throw new RentalValidationException(
-                    "Actual return date must be after rental expected date."
-            );
-        }
         this.dateActuallyReturned = dateActuallyReturned;
     }
 
@@ -234,11 +229,17 @@ public class Rental {
 
 
     /**
-     * Sets the final price of the rental.
+     * Sets the final calculated rental price.
      *
-     * @param finalPrice the final calculated rental price
+     * @param finalPrice final rental price
+     * @throws RentalValidationException if the final price is null or negative
      */
     public void setFinalPrice(BigDecimal finalPrice) {
+        if (finalPrice == null || finalPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new RentalValidationException(
+                    "Final price cannot be null or negative."
+            );
+        }
         this.finalPrice = finalPrice;
     }
 }
