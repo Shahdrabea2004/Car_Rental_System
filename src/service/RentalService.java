@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -26,11 +27,24 @@ public class RentalService {
      */
     private static final BigDecimal LATE_RETURN_FEE = BigDecimal.valueOf(50);
 
-
     /**
      * Stores customers who currently have an active rental.
      */
     private final Set<Customer> customersWithActiveRental = new HashSet<>();
+
+    /**
+     * Stores all rental records in the system.
+     */
+    private final List<Rental> rentals;
+
+    /**
+     * Creates a RentalService with the given list of rental records.
+     *
+     * @param rentals list used to store all rentals in the system
+     */
+    public RentalService(List<Rental> rentals) {
+        this.rentals = rentals;
+    }
 
     /**
      * Calculates the final rental price.
@@ -104,6 +118,22 @@ public class RentalService {
     }
 
     /**
+     * Validates that the rental ID is unique in the system.
+     *
+     * @param rental rental whose ID will be checked
+     * @throws RentalServiceException if the rental ID already exists
+     */
+    private void validateRentalId(Rental rental) {
+        for (Rental existingRental : rentals) {
+            if (existingRental.getId().equals(rental.getId())) {
+                throw new RentalServiceException(
+                        "Rental ID already exists."
+                );
+            }
+        }
+    }
+
+    /**
      * Processes a new car rental.
      *
      * @param rental rental to be processed
@@ -114,12 +144,16 @@ public class RentalService {
     public void rentalCar(Rental rental) {
         checkCustomerHasNoActiveRental(rental);
         validateCarAvailable(rental);
+        validateRentalId(rental);
 
         rental.setRentalStatuses(RentalStatuses.ACTIVE);
         rental.getCar().rent();
         rental.getCustomer().addRental(rental);
 
         customersWithActiveRental.add(rental.getCustomer());
+
+        rentals.add(rental);
+
     }
 
     /**
