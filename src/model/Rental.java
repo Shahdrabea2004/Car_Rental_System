@@ -242,4 +242,23 @@ public class Rental {
         }
         this.finalPrice = finalPrice;
     }
+
+    /**
+     * Returns a string representation of the rental.
+     *
+     * @return a string containing the rental details
+     */
+    @Override
+    public String toString() {
+        return "Rental{" +
+                "id='" + id + '\'' +
+                ", customer=" + customer +
+                ", car=" + car +
+                ", dateTheRentalBegins=" + dateTheRentalBegins +
+                ", dateExpectedBack=" + dateExpectedBack +
+                ", dateActuallyReturned=" + dateActuallyReturned +
+                ", finalPrice=" + finalPrice +
+                ", rentalStatuses=" + rentalStatuses +
+                '}';
+    }
 }

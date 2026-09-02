@@ -1,10 +1,10 @@
+import exception.*;
 import model.*;
-import service.CarSearchService;
-import service.CustomerService;
-import service.EmployeeService;
-import service.EmployeeServiceImpl;
+import service.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
@@ -12,19 +12,20 @@ import java.util.Scanner;
 
 public class Main {
 
+    // Shared system data
     static List<Car> cars = new ArrayList<>();
     static List<Rental> rentals = new ArrayList<>();
-
     static List<Customer> customers = new ArrayList<>();
+
+    static Scanner input = new Scanner(System.in);
+    // Service objects
     static EmployeeService employeeService =
             new EmployeeServiceImpl(cars, rentals);
-
     static CustomerService customerService = new CustomerService(customers);
-
     static CarSearchService carSearchService = new CarSearchService(cars);
-    static Scanner input = new Scanner(System.in);
+    static RentalService rentalService = new RentalService(rentals);
 
-
+    // Add a new car
     static void addCar() {
 
         input.nextLine();
@@ -136,6 +137,7 @@ public class Main {
         System.out.println("Car added successfully.");
     }
 
+    // Display all cars
     static void viewAllCars() {
         List<Car> cars = employeeService.viewAllCars();
 
@@ -149,6 +151,7 @@ public class Main {
         }
     }
 
+    // Display all rentals
     static void viewAllRentals() {
         List<Rental> rentals = employeeService.viewAllRentals();
 
@@ -162,46 +165,67 @@ public class Main {
         }
     }
 
+    // Put a car under maintenance
     static void putCarUnderMaintenance() {
-        System.out.print("Enter car ID: ");
-        String id = input.next();
 
-        boolean foundCar = false;
+        try {
+            System.out.print("Enter car ID: ");
+            String id = input.next();
 
-        for (Car car : cars) {
-            if (car.getId().equals(id)) {
-                employeeService.putCarUnderMaintenance(car);
-                System.out.println("Car placed under maintenance successfully.");
-                foundCar = true;
-                break;
+            Car car = null;
+
+            for (Car c : cars) {
+                if (c.getId().equals(id)) {
+                    car = c;
+                    break;
+                }
             }
-        }
 
-        if (!foundCar) {
-            System.out.println("This car was not found.");
+            if (car == null) {
+                System.out.println("Car not found.");
+                return;
+            }
+
+            employeeService.putCarUnderMaintenance(car);
+
+            System.out.println("Car placed under maintenance successfully.");
+
+        } catch (CarStatusException e) {
+            System.out.println(e.getMessage());
         }
     }
 
+    // Return a car from maintenance
     static void returnCarFromMaintenance() {
-        System.out.print("Enter car ID: ");
-        String id = input.next();
 
-        boolean foundCar = false;
+        try {
+            System.out.print("Enter car ID: ");
+            String id = input.next();
 
-        for (Car car : cars) {
-            if (car.getId().equals(id)) {
-                employeeService.returnCarFromMaintenance(car);
-                System.out.println("Car returned from maintenance successfully.");
-                foundCar = true;
-                break;
+            Car car = null;
+
+            for (Car c : cars) {
+                if (c.getId().equals(id)) {
+                    car = c;
+                    break;
+                }
             }
-        }
 
-        if (!foundCar) {
-            System.out.println("This car was not found.");
+            if (car == null) {
+                System.out.println("Car not found.");
+                return;
+            }
+
+            employeeService.returnCarFromMaintenance(car);
+
+            System.out.println("Car returned from maintenance successfully.");
+
+        } catch (CarStatusException e) {
+            System.out.println(e.getMessage());
         }
     }
 
+    // Handle employee menu
     static void employeeFeature() {
 
         int option = 0;
@@ -263,37 +287,46 @@ public class Main {
         }
     }
 
+    // Register a new customer
     static void registerCustomer() {
 
-        input.nextLine();
+        try {
+            input.nextLine();
 
-        System.out.print("Enter customer ID: ");
-        String id = input.nextLine();
+            System.out.print("Enter customer ID: ");
+            String id = input.nextLine();
 
-        System.out.print("Enter full name: ");
-        String fullName = input.nextLine();
+            System.out.print("Enter full name: ");
+            String fullName = input.nextLine();
 
-        System.out.print("Enter email: ");
-        String email = input.nextLine();
+            System.out.print("Enter email: ");
+            String email = input.nextLine();
 
-        System.out.print("Enter phone number: ");
-        String phoneNumber = input.nextLine();
+            System.out.print("Enter phone number: ");
+            String phoneNumber = input.nextLine();
 
-        List<Rental> historyRentals = new ArrayList<>();
+            List<Rental> historyRentals = new ArrayList<>();
 
-        Customer customer = new Customer(
-                id,
-                fullName,
-                email,
-                phoneNumber,
-                historyRentals
-        );
+            Customer customer = new Customer(
+                    id,
+                    fullName,
+                    email,
+                    phoneNumber,
+                    historyRentals
+            );
 
-        customerService.registerCustomer(customer);
+            customerService.registerCustomer(customer);
 
-        System.out.println("Customer registered successfully.");
+            System.out.println("Customer registered successfully.");
+
+        } catch (CustomerValidationException e) {
+            System.out.println(e.getMessage());
+        } catch (CustomerServiceException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
+    // Find a registered customer
     static Customer getRegisteredCustomer() {
 
         System.out.print("Enter customer ID: ");
@@ -307,6 +340,8 @@ public class Main {
 
         return customer;
     }
+
+    // Display available cars
     static void viewAvailableCars() {
         CarSearchCriteria carSearchCriteria = new CarSearchCriteria();
         carSearchCriteria.setStatus(CarStatus.AVAILABLE);
@@ -324,6 +359,7 @@ public class Main {
         }
     }
 
+    // Search cars using different criteria
     static void searchCars() {
         System.out.println("\n========================");
         System.out.println("       SEARCH CARS");
@@ -452,18 +488,140 @@ public class Main {
         }
     }
 
-    static void rentCar() {
+    // Rent a car
+    static void rentCar(Customer customer) {
 
+        try {
+            input.nextLine();
+
+            System.out.print("Enter rental ID: ");
+            String rentalId = input.nextLine();
+
+            System.out.print("Enter car ID: ");
+            String carId = input.nextLine();
+
+            Car car = null;
+
+            for (Car c : cars) {
+                if (c.getId().equals(carId)) {
+                    car = c;
+                    break;
+                }
+            }
+
+            if (car == null) {
+                System.out.println("Car not found.");
+                return;
+            }
+
+            System.out.print("Enter rental start date (YYYY-MM-DD): ");
+            LocalDate startDate = LocalDate.parse(input.nextLine());
+
+            System.out.print("Enter expected return date (YYYY-MM-DD): ");
+            LocalDate expectedReturnDate = LocalDate.parse(input.nextLine());
+
+            Rental rental = new Rental(
+                    rentalId,
+                    customer,
+                    car,
+                    startDate,
+                    expectedReturnDate
+            );
+
+            rentalService.rentalCar(rental);
+
+            System.out.println("Car rented successfully.");
+
+        } catch (DateTimeParseException e) {
+            System.out.println(
+                    "Invalid date format. Please use YYYY-MM-DD."
+            );
+
+        } catch (RentalValidationException e) {
+            System.out.println(e.getMessage());
+
+        } catch (RentalServiceException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
-    static void returnCar() {
+    // Return a rented car
+    static void returnCar(Customer customer) {
 
+        try {
+            input.nextLine();
+
+            System.out.print("Enter rental ID: ");
+            String rentalId = input.nextLine();
+
+            Rental rental = null;
+
+            for (Rental r : customer.getHistoryRentals()) {
+                if (r.getId().equals(rentalId)) {
+                    rental = r;
+                    break;
+                }
+            }
+
+            if (rental == null) {
+                System.out.println("Rental not found.");
+                return;
+            }
+
+            System.out.print("Enter actual return date (YYYY-MM-DD): ");
+            LocalDate actualReturnDate = LocalDate.parse(input.nextLine());
+
+            rentalService.returnCar(actualReturnDate, rental);
+
+            System.out.println("Car returned successfully.");
+
+        } catch (DateTimeParseException e) {
+            System.out.println(
+                    "Invalid date format. Please use YYYY-MM-DD."
+            );
+
+        } catch (RentalValidationException e) {
+            System.out.println(e.getMessage());
+
+        } catch (RentalServiceException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
-    static void viewRentalHistory() {
+    // Display customer's rental history
+    static void viewRentalHistory(Customer customer) {
 
+        List<Rental> rentals = customer.getHistoryRentals();
+
+        if (rentals.isEmpty()) {
+            System.out.println("No rental history found.");
+            return;
+        }
+
+        System.out.println("\n========================");
+        System.out.println("      RENTAL HISTORY");
+        System.out.println("========================");
+
+        for (Rental rental : rentals) {
+            System.out.println("Rental ID: " + rental.getId());
+            System.out.println("Car: "
+                    + rental.getCar().getBrand() + " "
+                    + rental.getCar().getModel());
+            System.out.println("Start Date: "
+                    + rental.getDateTheRentalBegins());
+            System.out.println("Expected Return: "
+                    + rental.getDateExpectedBack());
+            System.out.println("Actual Return: "
+                    + rental.getDateActuallyReturned());
+            System.out.println("Status: "
+                    + rental.getRentalStatuses());
+            System.out.println("Final Price: "
+                    + rental.getFinalPrice());
+            System.out.println("------------------------");
+        }
     }
 
+    // Handle customer menu
     public static void customerFeature() {
 
         int option = 0;
@@ -492,28 +650,53 @@ public class Main {
                         break;
 
                     case 2:
-                        getRegisteredCustomer();
+                        Customer customer = getRegisteredCustomer();
+
+                        if (customer == null) {
+                            break;
+                        }
+
                         viewAvailableCars();
                         break;
 
                     case 3:
-                        getRegisteredCustomer();
+                        customer = getRegisteredCustomer();
+
+                        if (customer == null) {
+                            break;
+                        }
+
                         searchCars();
                         break;
 
                     case 4:
-                        getRegisteredCustomer();
-                        rentCar();
+                        customer = getRegisteredCustomer();
+
+                        if (customer == null) {
+                            break;
+                        }
+
+                        rentCar(customer);
                         break;
 
                     case 5:
-                        getRegisteredCustomer();
-                        returnCar();
+                        customer = getRegisteredCustomer();
+
+                        if (customer == null) {
+                            break;
+                        }
+
+                        returnCar(customer);
                         break;
 
                     case 6:
-                        getRegisteredCustomer();
-                        viewRentalHistory();
+                        customer = getRegisteredCustomer();
+
+                        if (customer == null) {
+                            break;
+                        }
+
+                        viewRentalHistory(customer);
                         break;
 
                     case 7:
@@ -535,6 +718,7 @@ public class Main {
         }
     }
 
+    // Start the application
     public static void main(String[] args) {
 
         int option = 0;

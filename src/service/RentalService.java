@@ -153,7 +153,6 @@ public class RentalService {
         customersWithActiveRental.add(rental.getCustomer());
 
         rentals.add(rental);
-
     }
 
     /**
