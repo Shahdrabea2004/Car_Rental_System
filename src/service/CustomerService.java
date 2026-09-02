@@ -18,7 +18,17 @@ public class CustomerService {
     /**
      * Stores all registered customers in the system.
      */
-    private final List<Customer> customers = new ArrayList<>();
+    private final List<Customer> customers;
+
+    /**
+     * Creates a CustomerService using the provided customer list.
+     *
+     * @param customers the list of registered customers
+     */
+    public CustomerService(List<Customer> customers) {
+        this.customers = customers;
+    }
+
 
     /**
      * Validates that the customer ID is unique in the system.
@@ -27,6 +37,11 @@ public class CustomerService {
      * @throws CustomerServiceException if the customer ID already exists
      */
     private void validateCustomerId(Customer customer) {
+        if (customer == null) {
+            throw new CustomerServiceException(
+                    "Customer cannot be null."
+            );
+        }
         for (Customer existingCustomer : customers) {
             if (existingCustomer.getId().equals(customer.getId())) {
                 throw new CustomerServiceException(
@@ -44,13 +59,24 @@ public class CustomerService {
      * or the customer ID already exists
      */
     public void registerCustomer(Customer customer) {
-        if (customer == null) {
-            throw new CustomerServiceException(
-                    "Customer cannot be null."
-            );
-        }
-
         validateCustomerId(customer);
         customers.add(customer);
+    }
+
+    /**
+     * Searches for a customer by their ID.
+     *
+     * @param customerId the ID of the customer to search for
+     * @return the matching customer if found, otherwise null
+     */
+    public Customer searchCustomer(String customerId) {
+
+        for (Customer customer : customers) {
+            if (customer.getId().equals(customerId)) {
+                return customer;
+            }
+        }
+
+        return null;
     }
 }

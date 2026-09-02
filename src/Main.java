@@ -1,4 +1,6 @@
 import model.*;
+import service.CarSearchService;
+import service.CustomerService;
 import service.EmployeeService;
 import service.EmployeeServiceImpl;
 
@@ -11,12 +13,15 @@ import java.util.Scanner;
 public class Main {
 
     static List<Car> cars = new ArrayList<>();
-    static List<Customer> customers = new ArrayList<>();
-
     static List<Rental> rentals = new ArrayList<>();
 
+    static List<Customer> customers = new ArrayList<>();
     static EmployeeService employeeService =
             new EmployeeServiceImpl(cars, rentals);
+
+    static CustomerService customerService = new CustomerService(customers);
+
+    static CarSearchService carSearchService = new CarSearchService(cars);
     static Scanner input = new Scanner(System.in);
 
 
@@ -132,7 +137,7 @@ public class Main {
     }
 
     static void viewAllCars() {
-       List<Car>cars = employeeService.viewAllCars();
+        List<Car> cars = employeeService.viewAllCars();
 
         if (cars.isEmpty()) {
             System.out.println("No cars available.");
@@ -258,27 +263,204 @@ public class Main {
         }
     }
 
-    static void registerCustomer(){
+    static void registerCustomer() {
+
+        input.nextLine();
+
+        System.out.print("Enter customer ID: ");
+        String id = input.nextLine();
+
+        System.out.print("Enter full name: ");
+        String fullName = input.nextLine();
+
+        System.out.print("Enter email: ");
+        String email = input.nextLine();
+
+        System.out.print("Enter phone number: ");
+        String phoneNumber = input.nextLine();
+
+        List<Rental> historyRentals = new ArrayList<>();
+
+        Customer customer = new Customer(
+                id,
+                fullName,
+                email,
+                phoneNumber,
+                historyRentals
+        );
+
+        customerService.registerCustomer(customer);
+
+        System.out.println("Customer registered successfully.");
+    }
+
+    static Customer getRegisteredCustomer() {
+
+        System.out.print("Enter customer ID: ");
+        String customerId = input.next();
+
+        Customer customer = customerService.searchCustomer(customerId);
+
+        if (customer == null) {
+            System.out.println("Customer is not registered.");
+        }
+
+        return customer;
+    }
+    static void viewAvailableCars() {
+        CarSearchCriteria carSearchCriteria = new CarSearchCriteria();
+        carSearchCriteria.setStatus(CarStatus.AVAILABLE);
+
+        List<Car> result = carSearchService.search(carSearchCriteria);
+
+        if (result.isEmpty()) {
+            System.out.println("No cars available.");
+            return;
+        }
+
+        System.out.println("\nAvailable Cars:");
+        for (Car car : result) {
+            System.out.println(car);
+        }
+    }
+
+    static void searchCars() {
+        System.out.println("\n========================");
+        System.out.println("       SEARCH CARS");
+        System.out.println("========================");
+        System.out.println("1. Search by Type");
+        System.out.println("2. Search by Brand");
+        System.out.println("3. Search by Price Range");
+        System.out.println("4. Search Available Cars");
+        System.out.println("5. Search by Multiple Criteria");
+        System.out.println("6. Back");
+        System.out.print("Enter your choice: ");
+
+        int option = input.nextInt();
+        input.nextLine();
+
+        List<Car> result;
+        CarSearchCriteria carSearchCriteria = new CarSearchCriteria();
+
+        switch (option) {
+
+            case 1:
+                // Search by Type
+                System.out.print("Enter car type (EconomyCar, LuxuryCar, SUV, Truck): ");
+                String type = input.nextLine();
+
+                carSearchCriteria.setType(type);
+                break;
+
+            case 2:
+                // Search by Brand
+                System.out.print("Enter car brand: ");
+                String brand = input.nextLine();
+
+                carSearchCriteria.setBrand(brand);
+                break;
+
+            case 3:
+                // Search by Price Range
+                System.out.print("Enter minimum price: ");
+                BigDecimal minPrice = input.nextBigDecimal();
+
+                System.out.print("Enter maximum price: ");
+                BigDecimal maxPrice = input.nextBigDecimal();
+
+                carSearchCriteria.setMinPrice(minPrice);
+                carSearchCriteria.setMaxPrice(maxPrice);
+                break;
+
+            case 4:
+                // Search Available Cars
+                carSearchCriteria.setStatus(CarStatus.AVAILABLE);
+                break;
+
+            case 5:
+                // Search by Multiple Criteria
+                System.out.print("Enter car type (EconomyCar, LuxuryCar, SUV, Truck) or press Enter to skip: ");
+                String typeInput = input.nextLine();
+
+                if (!typeInput.isEmpty()) {
+                    carSearchCriteria.setType(typeInput);
+                }
+
+                System.out.print("Enter car brand (or press Enter to skip): ");
+                String brandInput = input.nextLine();
+
+                if (!brandInput.isEmpty()) {
+                    carSearchCriteria.setBrand(brandInput);
+                }
+
+                System.out.print("Enter minimum price (or press Enter to skip): ");
+                String minPriceInput = input.nextLine();
+
+                if (!minPriceInput.isEmpty()) {
+                    carSearchCriteria.setMinPrice(
+                            new BigDecimal(minPriceInput)
+                    );
+                }
+
+                System.out.print("Enter maximum price (or press Enter to skip): ");
+                String maxPriceInput = input.nextLine();
+
+                if (!maxPriceInput.isEmpty()) {
+                    carSearchCriteria.setMaxPrice(
+                            new BigDecimal(maxPriceInput)
+                    );
+                }
+
+                System.out.print("Search available cars only? (yes/no): ");
+                String available = input.nextLine();
+
+                if (available.equalsIgnoreCase("yes")) {
+                    carSearchCriteria.setStatus(CarStatus.AVAILABLE);
+                }
+
+                if (typeInput.isEmpty()
+                        && brandInput.isEmpty()
+                        && minPriceInput.isEmpty()
+                        && maxPriceInput.isEmpty()
+                        && available.equalsIgnoreCase("no")) {
+
+                    System.out.println("No search criteria entered.");
+                    return;
+                }
+
+                break;
+            case 6:
+                System.out.println("Returning to customer menu...");
+                return;
+
+            default:
+                System.out.println("Invalid option. Please choose 1-6.");
+                return;
+        }
+
+        result = carSearchService.search(carSearchCriteria);
+
+        if (result.isEmpty()) {
+            System.out.println("No cars found.");
+            return;
+        }
+
+        System.out.println("\nSearch Results:");
+
+        for (Car car : result) {
+            System.out.println(car);
+        }
+    }
+
+    static void rentCar() {
 
     }
 
-    static void viewAvailableCars(){
+    static void returnCar() {
 
     }
 
-    static void searchCars(){
-
-    }
-
-    static void rentCar(){
-
-    }
-
-    static void returnCar(){
-
-    }
-
-    static void viewRentalHistory(){
+    static void viewRentalHistory() {
 
     }
 
@@ -310,22 +492,27 @@ public class Main {
                         break;
 
                     case 2:
+                        getRegisteredCustomer();
                         viewAvailableCars();
                         break;
 
                     case 3:
+                        getRegisteredCustomer();
                         searchCars();
                         break;
 
                     case 4:
+                        getRegisteredCustomer();
                         rentCar();
                         break;
 
                     case 5:
+                        getRegisteredCustomer();
                         returnCar();
                         break;
 
                     case 6:
+                        getRegisteredCustomer();
                         viewRentalHistory();
                         break;
 
